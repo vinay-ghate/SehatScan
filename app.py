@@ -35,8 +35,15 @@ if sys.version_info < (3, 12):
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Import custom modules
-from src.medical_ocr import MedicalOCRProcessor
+# Import custom modules with error handling
+try:
+    from src.medical_ocr import MedicalOCRProcessor
+    OCR_IMPORT_SUCCESS = True
+except Exception as e:
+    logger.warning(f"OCR module import failed: {e}")
+    MedicalOCRProcessor = None
+    OCR_IMPORT_SUCCESS = False
+
 from src.visualizer import MedicalDataVisualizer
 from src.specialist import SpecialistAdvisor
 
@@ -57,18 +64,19 @@ class SehatScanApp:
     def initialize_ocr(self):
         """Initialize OCR processor (lazy loading for performance)."""
         if self.ocr_processor is None:
+            if not OCR_IMPORT_SUCCESS or MedicalOCRProcessor is None:
+                st.error("❌ OCR functionality not available")
+                st.info(
+                    "🔄 **Alternative Options:**\n"
+                    "- Use the 'Input JSON' tab to paste medical data directly\n"
+                    "- OCR dependencies may not be available on this platform\n"
+                    "- For local development, install with: `uv sync --extra ocr`"
+                )
+                return None
+            
             with st.spinner("Initializing OCR processor..."):
                 try:
                     self.ocr_processor = MedicalOCRProcessor()
-                except ImportError as e:
-                    st.error("❌ OCR functionality not available")
-                    st.info(
-                        "🔄 **Alternative Options:**\n"
-                        "- Use the 'Input JSON' tab to paste medical data directly\n"
-                        "- OCR dependencies may not be available on this platform\n"
-                        "- For local development, install with: `uv sync --extra ocr`"
-                    )
-                    return None
                 except Exception as e:
                     st.error(f"❌ OCR initialization failed: {str(e)}")
                     st.info("💡 You can still use the JSON input feature!")
@@ -169,13 +177,16 @@ def render_sidebar():
     # Application Info
     st.sidebar.subheader("ℹ️ About")
     # Check OCR availability for sidebar info
-    try:
-        from src.medical_ocr.ocr_processor import PADDLEOCR_AVAILABLE
-        if PADDLEOCR_AVAILABLE:
-            ocr_status = "📄 **Smart OCR** - Reads your report images"
-        else:
+    if OCR_IMPORT_SUCCESS:
+        try:
+            from src.medical_ocr.ocr_processor import PADDLEOCR_AVAILABLE
+            if PADDLEOCR_AVAILABLE:
+                ocr_status = "📄 **Smart OCR** - Reads your report images"
+            else:
+                ocr_status = "📝 **JSON Input** - Paste your medical data directly"
+        except:
             ocr_status = "📝 **JSON Input** - Paste your medical data directly"
-    except:
+    else:
         ocr_status = "📝 **JSON Input** - Paste your medical data directly"
     
     st.sidebar.info(
@@ -539,15 +550,21 @@ def main():
     st.markdown("**AI-powered medical report analysis that makes your health data clear and accessible.**")
     
     # Check if running on Streamlit Cloud (OCR not available)
-    try:
-        from src.medical_ocr.ocr_processor import PADDLEOCR_AVAILABLE
-        if not PADDLEOCR_AVAILABLE:
+    if OCR_IMPORT_SUCCESS:
+        try:
+            from src.medical_ocr.ocr_processor import PADDLEOCR_AVAILABLE
+            if not PADDLEOCR_AVAILABLE:
+                st.info(
+                    "ℹ️ **Running in Cloud Mode**: OCR is not available on this platform. "
+                    "Please use the **'Input JSON'** tab to paste your medical data directly. "
+                    "All visualization and AI recommendation features are fully available!"
+                )
+        except:
             st.info(
-                "ℹ️ **Running in Cloud Mode**: OCR is not available on this platform. "
-                "Please use the **'Input JSON'** tab to paste your medical data directly. "
-                "All visualization and AI recommendation features are fully available!"
+                "ℹ️ **JSON Input Mode**: Use the **'Input JSON'** tab to paste your medical data. "
+                "All visualization and AI recommendation features are available!"
             )
-    except:
+    else:
         st.info(
             "ℹ️ **JSON Input Mode**: Use the **'Input JSON'** tab to paste your medical data. "
             "All visualization and AI recommendation features are available!"
@@ -557,22 +574,28 @@ def main():
     
     # Create tabs for different input methods
     # Check OCR availability to determine tab order and labels
-    try:
-        from src.medical_ocr.ocr_processor import PADDLEOCR_AVAILABLE
-        if PADDLEOCR_AVAILABLE:
-            tab1, tab2 = st.tabs(["📄 Upload Image", "📝 Input JSON"])
-        else:
+    if OCR_IMPORT_SUCCESS:
+        try:
+            from src.medical_ocr.ocr_processor import PADDLEOCR_AVAILABLE
+            if PADDLEOCR_AVAILABLE:
+                tab1, tab2 = st.tabs(["📄 Upload Image", "📝 Input JSON"])
+            else:
+                tab1, tab2 = st.tabs(["📝 Input JSON Data", "📄 Upload Image (Not Available)"])
+        except:
             tab1, tab2 = st.tabs(["📝 Input JSON Data", "📄 Upload Image (Not Available)"])
-    except:
+    else:
         tab1, tab2 = st.tabs(["📝 Input JSON Data", "📄 Upload Image (Not Available)"])
     
     medical_data = None
     
     # Handle tab content based on OCR availability
-    try:
-        from src.medical_ocr.ocr_processor import PADDLEOCR_AVAILABLE
-        ocr_available = PADDLEOCR_AVAILABLE
-    except:
+    if OCR_IMPORT_SUCCESS:
+        try:
+            from src.medical_ocr.ocr_processor import PADDLEOCR_AVAILABLE
+            ocr_available = PADDLEOCR_AVAILABLE
+        except:
+            ocr_available = False
+    else:
         ocr_available = False
     
     if ocr_available:

@@ -12,11 +12,15 @@ from typing import Any, Optional
 import numpy as np
 from PIL import Image
 
+# Initialize logger first
+logger = logging.getLogger(__name__)
+
 # Python 3.12+ type aliases for better readability
 type MedicalData = dict[str, Any]
 type DetectionList = list[dict[str, Any]]
 type LineGroups = list[list[dict[str, Any]]]
 
+# Try to import PaddleOCR with proper error handling
 try:
     from paddleocr import PaddleOCR
     PADDLEOCR_AVAILABLE = True
@@ -29,8 +33,6 @@ except Exception as e:
     PADDLEOCR_AVAILABLE = False
     PaddleOCR = None
     logger.warning(f"PaddleOCR import failed: {e}")
-
-logger = logging.getLogger(__name__)
 
 
 class MedicalOCRProcessor:
