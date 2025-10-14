@@ -37,8 +37,15 @@ SehatScan AI helps you instantly understand your lab reports in clear, simple la
    ```
 
 3. **Install dependencies:**
+   
+   **Option A: Using UV (Recommended for local development):**
    ```bash
-   uv sync
+   uv sync --no-install-project
+   ```
+   
+   **Option B: Using pip:**
+   ```bash
+   pip install -r requirements.txt
    ```
 
 4. **Set up your API keys:**
@@ -48,8 +55,15 @@ SehatScan AI helps you instantly understand your lab reports in clear, simple la
    ```
 
 5. **Run SehatScan:**
+   
+   **With UV:**
    ```bash
    uv run streamlit run app.py
+   ```
+   
+   **With pip:**
+   ```bash
+   streamlit run app.py
    ```
 
 ## 🔑 API Setup

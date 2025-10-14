@@ -11,7 +11,7 @@ if not exist .env (
 )
 
 echo Ensuring dependencies are installed...
-uv sync
+uv sync --no-install-project
 
 echo Starting SehatScan application...
 uv run streamlit run app.py

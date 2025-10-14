@@ -1,0 +1,17 @@
+# SehatScan Dependencies
+# Core dependencies for Streamlit Cloud deployment
+
+streamlit>=1.40.0
+plotly>=5.25.0
+huggingface-hub>=0.26.0
+python-dotenv>=1.0.1
+pillow>=10.4.0
+pandas>=2.2.0
+numpy>=2.0.0
+requests>=2.32.0
+google-generativeai>=0.8.3
+
+# OCR Dependencies (may need manual installation on some platforms)
+paddlepaddle>=3.0.0b1
+paddleocr>=2.8.1
+opencv-python>=4.10.0.84

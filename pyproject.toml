@@ -1,8 +1,18 @@
+# SehatScan Project Configuration
+# For local development with UV package manager
+
 [project]
 name = "sehatscan"
 version = "0.1.0"
 description = "AI-powered medical report analysis that makes your health data clear and accessible"
 requires-python = ">=3.12"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "SehatScan Team"}
+]
+
+# Dependencies for local development
 dependencies = [
     "streamlit>=1.40.0",
     "plotly>=5.25.0",
@@ -25,6 +35,7 @@ ocr = [
     "opencv-python>=4.8.0",
 ]
 
+# Development dependencies
 [tool.uv]
 dev-dependencies = [
     "pytest>=8.0.0",
@@ -33,3 +44,6 @@ dev-dependencies = [
     "mypy>=1.8.0",
     "ruff>=0.6.0",
 ]
+
+# Package mode disabled for Streamlit deployment
+package = false

@@ -26,7 +26,7 @@ if %errorlevel% neq 0 (
 )
 
 echo UV found. Installing dependencies...
-uv sync
+uv sync --no-install-project
 
 if %errorlevel% neq 0 (
     echo Failed to install dependencies.
