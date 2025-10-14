@@ -54,7 +54,7 @@ class SpecialistAdvisor:
         if self.gemini_api_key:
             try:
                 genai.configure(api_key=self.gemini_api_key)
-                self.gemini_model = genai.GenerativeModel('gemini-1.5-flash')
+                self.gemini_model = genai.GenerativeModel('gemini-2.5-flash-lite')
                 logger.info("Gemini model initialized (can handle both medical analysis and formatting)")
             except Exception as e:
                 self.gemini_model = None
