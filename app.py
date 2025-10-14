@@ -16,9 +16,20 @@ import streamlit as st
 import json
 import logging
 import os
-from typing import Dict, Any, Optional
+import sys
+from typing import Any, Optional
 from PIL import Image
 import io
+
+# Python 3.12+ type aliases for better code readability
+type MedicalData = dict[str, Any]
+
+# Check Python version
+if sys.version_info < (3, 12):
+    st.warning(
+        f"⚠️ You're using Python {sys.version_info.major}.{sys.version_info.minor}. "
+        f"SehatScan is optimized for Python 3.12+ for better performance and features."
+    )
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -206,7 +217,7 @@ def render_json_input():
     return None
 
 
-def process_medical_document(app: SehatScanApp, image: Image.Image) -> Optional[Dict[str, Any]]:
+def process_medical_document(app: SehatScanApp, image: Image.Image) -> Optional[MedicalData]:
     """Process medical document using OCR."""
     try:
         with st.spinner("🔍 Processing medical document with OCR..."):
@@ -229,7 +240,7 @@ def process_medical_document(app: SehatScanApp, image: Image.Image) -> Optional[
         return None
 
 
-def display_extracted_data(medical_data: Dict[str, Any]):
+def display_extracted_data(medical_data: MedicalData):
     """Display extracted medical data."""
     st.subheader("📊 Extracted Medical Data")
     
@@ -275,7 +286,7 @@ def display_extracted_data(medical_data: Dict[str, Any]):
         st.json(medical_data)
 
 
-def create_visualizations(app: SehatScanApp, medical_data: Dict[str, Any]):
+def create_visualizations(app: SehatScanApp, medical_data: MedicalData):
     """Create and display visualizations."""
     st.subheader("📈 Data Visualizations")
     
@@ -321,7 +332,7 @@ def create_visualizations(app: SehatScanApp, medical_data: Dict[str, Any]):
         logger.error(f"Visualization error: {str(e)}")
 
 
-def generate_recommendations(app: SehatScanApp, medical_data: Dict[str, Any], api_key: str):
+def generate_recommendations(app: SehatScanApp, medical_data: MedicalData, api_key: str):
     """Generate AI-powered specialist recommendations."""
     st.subheader("🩺 Specialist Recommendations")
     

@@ -8,9 +8,14 @@ import json
 import logging
 import tempfile
 import os
-from typing import Dict, List, Any, Tuple, Optional
+from typing import Any, Optional
 import numpy as np
 from PIL import Image
+
+# Python 3.12+ type aliases for better readability
+type MedicalData = dict[str, Any]
+type DetectionList = list[dict[str, Any]]
+type LineGroups = list[list[dict[str, Any]]]
 
 try:
     from paddleocr import PaddleOCR
@@ -40,7 +45,7 @@ class MedicalOCRProcessor:
         self.ocr = PaddleOCR(lang=lang, use_angle_cls=use_angle_cls)
         logger.info("Medical OCR Processor initialized")
     
-    def process_image(self, image_input) -> Dict[str, Any]:
+    def process_image(self, image_input) -> MedicalData:
         """
         Process a medical document image using exact same logic as working MedicalOCR.
         """

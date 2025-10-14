@@ -14,6 +14,11 @@ SehatScan AI helps you instantly understand your lab reports in clear, simple la
 
 ## 🚀 Quick Start
 
+### Prerequisites
+
+- **Python 3.12 or higher** (recommended for optimal performance and latest features)
+- UV package manager (modern Python package management)
+
 ### Installation
 
 1. **Get the code:**

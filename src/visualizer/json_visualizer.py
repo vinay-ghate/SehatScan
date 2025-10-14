@@ -7,11 +7,16 @@ for medical test results and patient data.
 
 import json
 import logging
-from typing import Dict, List, Any, Optional, Tuple
+from typing import Any, Optional
 import plotly.graph_objects as go
 import plotly.express as px
 import pandas as pd
 import numpy as np
+
+# Python 3.12+ type aliases
+type MedicalData = dict[str, Any]
+type ObservationList = list[dict[str, Any]]
+type VisualizationDict = dict[str, go.Figure]
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +33,7 @@ class MedicalDataVisualizer:
         """Initialize the Medical Data Visualizer."""
         logger.info("Medical Data Visualizer initialized")
     
-    def create_visualizations(self, medical_data: Dict[str, Any]) -> Dict[str, go.Figure]:
+    def create_visualizations(self, medical_data: MedicalData) -> VisualizationDict:
         """
         Create comprehensive visualizations from medical data.
         
@@ -67,7 +72,7 @@ class MedicalDataVisualizer:
             logger.error(f"Failed to create visualizations: {str(e)}")
             return {}
     
-    def _create_gauge_chart(self, observation: Dict[str, Any]) -> Optional[go.Figure]:
+    def _create_gauge_chart(self, observation: dict[str, Any]) -> Optional[go.Figure]:
         """
         Create a gauge chart for a single test observation.
         
@@ -135,7 +140,7 @@ class MedicalDataVisualizer:
             logger.error(f"Failed to create gauge chart: {str(e)}")
             return None
     
-    def _create_overview_charts(self, observations: List[Dict[str, Any]]) -> Dict[str, go.Figure]:
+    def _create_overview_charts(self, observations: ObservationList) -> VisualizationDict:
         """
         Create overview charts for all observations.
         
@@ -225,7 +230,7 @@ class MedicalDataVisualizer:
         
         return charts
     
-    def _parse_reference_range(self, reference_range: str) -> Tuple[Optional[float], Optional[float]]:
+    def _parse_reference_range(self, reference_range: str) -> tuple[Optional[float], Optional[float]]:
         """
         Parse reference range string into min and max values.
         
