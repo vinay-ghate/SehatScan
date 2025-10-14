@@ -85,10 +85,22 @@ class SehatScanApp:
     
     def initialize_specialist_advisor(self, api_key: str):
         """Initialize specialist advisor with API key."""
-        if api_key:
-            # Get Gemini API key from environment or use None for fallback
+        if self.specialist_advisor is None:
+            # Get Gemini API key from environment
             gemini_key = os.getenv("GEMINI_API_KEY")
-            self.specialist_advisor = SpecialistAdvisor(api_key, gemini_key)
+            
+            # Need at least one API key to work
+            if api_key or gemini_key:
+                try:
+                    self.specialist_advisor = SpecialistAdvisor(api_key, gemini_key)
+                    logger.info("Specialist advisor initialized successfully")
+                except Exception as e:
+                    logger.error(f"Failed to initialize specialist advisor: {e}")
+                    self.specialist_advisor = None
+            else:
+                logger.warning("No API keys provided for specialist advisor")
+                self.specialist_advisor = None
+        
         return self.specialist_advisor
 
 
@@ -383,6 +395,18 @@ def generate_recommendations(app: SehatScanApp, medical_data: MedicalData, api_k
         status_text.text("🔧 Initializing AI models...")
         progress_bar.progress(20)
         specialist_advisor = app.initialize_specialist_advisor(api_key)
+        
+        if specialist_advisor is None:
+            progress_bar.empty()
+            status_text.empty()
+            st.error("❌ Failed to initialize AI services")
+            st.info(
+                "**Please check:**\n"
+                "- At least one API key is provided (Hugging Face or Gemini)\n"
+                "- API keys are valid and have proper permissions\n"
+                "- Network connection is available"
+            )
+            return
         
         status_text.text("🧠 Analyzing medical data...")
         progress_bar.progress(40)
