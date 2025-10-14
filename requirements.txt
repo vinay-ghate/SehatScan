@@ -1,4 +1,4 @@
-# SehatScan Core Dependencies
+# SehatScan Core Dependencies for Streamlit Cloud
 streamlit>=1.39.0
 plotly>=5.24.0
 huggingface-hub>=0.24.0
@@ -9,7 +9,6 @@ numpy>=1.24.0
 requests>=2.31.0
 google-generativeai>=0.8.0
 
-# OCR Dependencies (optional - app works without OCR using JSON input)
-paddlepaddle-cpu>=2.6.0
-paddleocr>=2.7.0
-opencv-python-headless>=4.8.0
+# Note: OCR dependencies (PaddleOCR) are not compatible with Streamlit Cloud
+# The app will automatically use JSON-only mode
+# For local development with OCR, use: uv sync --extra ocr

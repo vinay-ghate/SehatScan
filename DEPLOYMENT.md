@@ -26,10 +26,15 @@
 7. **Deploy!** Streamlit Cloud will automatically install dependencies from `requirements.txt`
 
 ### **Files for Streamlit Cloud:**
-- ✅ `requirements.txt` - Python dependencies
-- ✅ `packages.txt` - System dependencies (for OCR libraries)
+- ✅ `requirements.txt` - Python dependencies (OCR-free for compatibility)
 - ✅ `.streamlit/config.toml` - Streamlit configuration
-- ✅ `app.py` - Main application file
+- ✅ `app.py` - Main application file (auto-detects OCR availability)
+
+### **Streamlit Cloud Features:**
+- ✅ **JSON Input** - Paste medical data directly
+- ✅ **Data Visualization** - Interactive charts and gauges
+- ✅ **AI Recommendations** - Full health suggestions
+- ❌ **OCR Upload** - Not available (use JSON input instead)
 
 ## 🏠 Local Development
 
@@ -83,11 +88,11 @@ cp .env.example .env
 
 ### **Common Issues:**
 
-1. **OCR Dependencies:**
-   - PaddleOCR may not work on Streamlit Cloud due to system dependencies
-   - **Solution**: Use the "Input JSON" tab to paste medical data directly
-   - OCR works best in local development environments
-   - The app automatically detects OCR availability and adapts the interface
+1. **OCR Not Available on Streamlit Cloud:**
+   - PaddleOCR is not compatible with Streamlit Cloud (Python 3.13 + system dependencies)
+   - **This is expected behavior** - the app is designed to work without OCR
+   - **Solution**: Use JSON input mode - all other features work perfectly
+   - The app automatically detects this and shows appropriate interface
 
 2. **API Keys:**
    - Make sure keys are properly set in Streamlit secrets

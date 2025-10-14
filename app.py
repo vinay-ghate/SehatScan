@@ -171,9 +171,12 @@ def render_sidebar():
     # Check OCR availability for sidebar info
     try:
         from src.medical_ocr.ocr_processor import PADDLEOCR_AVAILABLE
-        ocr_status = "📄 **Smart OCR** - Reads your report images" if PADDLEOCR_AVAILABLE else "📄 **JSON Input** - Paste your medical data"
+        if PADDLEOCR_AVAILABLE:
+            ocr_status = "📄 **Smart OCR** - Reads your report images"
+        else:
+            ocr_status = "📝 **JSON Input** - Paste your medical data directly"
     except:
-        ocr_status = "📄 **JSON Input** - Paste your medical data"
+        ocr_status = "📝 **JSON Input** - Paste your medical data directly"
     
     st.sidebar.info(
         f"SehatScan makes your medical reports easy to understand:\n\n"
@@ -534,27 +537,85 @@ def main():
     # Main content
     st.title("🩺 SehatScan")
     st.markdown("**AI-powered medical report analysis that makes your health data clear and accessible.**")
-    st.markdown("Upload your medical report to get instant insights, visual charts, and personalized health recommendations.")
+    
+    # Check if running on Streamlit Cloud (OCR not available)
+    try:
+        from src.medical_ocr.ocr_processor import PADDLEOCR_AVAILABLE
+        if not PADDLEOCR_AVAILABLE:
+            st.info(
+                "ℹ️ **Running in Cloud Mode**: OCR is not available on this platform. "
+                "Please use the **'Input JSON'** tab to paste your medical data directly. "
+                "All visualization and AI recommendation features are fully available!"
+            )
+    except:
+        st.info(
+            "ℹ️ **JSON Input Mode**: Use the **'Input JSON'** tab to paste your medical data. "
+            "All visualization and AI recommendation features are available!"
+        )
+    
+    st.markdown("Get instant insights, visual charts, and personalized health recommendations from your medical data.")
     
     # Create tabs for different input methods
-    tab1, tab2 = st.tabs(["📄 Upload Image", "📝 Input JSON"])
+    # Check OCR availability to determine tab order and labels
+    try:
+        from src.medical_ocr.ocr_processor import PADDLEOCR_AVAILABLE
+        if PADDLEOCR_AVAILABLE:
+            tab1, tab2 = st.tabs(["📄 Upload Image", "📝 Input JSON"])
+        else:
+            tab1, tab2 = st.tabs(["📝 Input JSON Data", "📄 Upload Image (Not Available)"])
+    except:
+        tab1, tab2 = st.tabs(["📝 Input JSON Data", "📄 Upload Image (Not Available)"])
     
     medical_data = None
     
-    with tab1:
-        uploaded_image = render_file_upload()
-        if uploaded_image is not None:
-            if st.button("🔍 Process Document", key="process_ocr"):
-                ocr_processor = app.initialize_ocr()
-                if ocr_processor is not None:
-                    medical_data = process_medical_document(app, uploaded_image)
-                else:
-                    st.error("❌ Cannot process document: OCR not available")
+    # Handle tab content based on OCR availability
+    try:
+        from src.medical_ocr.ocr_processor import PADDLEOCR_AVAILABLE
+        ocr_available = PADDLEOCR_AVAILABLE
+    except:
+        ocr_available = False
     
-    with tab2:
-        json_data = render_json_input()
-        if json_data is not None:
-            medical_data = json_data
+    if ocr_available:
+        # OCR is available - normal flow
+        with tab1:
+            uploaded_image = render_file_upload()
+            if uploaded_image is not None:
+                if st.button("🔍 Process Document", key="process_ocr"):
+                    ocr_processor = app.initialize_ocr()
+                    if ocr_processor is not None:
+                        medical_data = process_medical_document(app, uploaded_image)
+                    else:
+                        st.error("❌ Cannot process document: OCR not available")
+        
+        with tab2:
+            json_data = render_json_input()
+            if json_data is not None:
+                medical_data = json_data
+    else:
+        # OCR not available - JSON first, disabled image upload
+        with tab1:
+            json_data = render_json_input()
+            if json_data is not None:
+                medical_data = json_data
+        
+        with tab2:
+            st.warning("📄 **Image Upload Not Available**")
+            st.info(
+                "OCR functionality is not available on this platform. "
+                "This is common on cloud deployments due to system dependencies.\n\n"
+                "**Alternative**: Use the 'Input JSON Data' tab to paste your medical data directly."
+            )
+            st.markdown("**Sample JSON format:**")
+            st.code('''
+{
+  "patient": {"name": "John Doe", "dob": "01/01/1990", "sex": "Male"},
+  "observations": [
+    {"test_name": "Hemoglobin", "result": "13.5", "unit": "g/dL", "reference_range": "12.0-16.0", "flag": "N"},
+    {"test_name": "Glucose", "result": "95", "unit": "mg/dL", "reference_range": "70-99", "flag": "N"}
+  ]
+}
+            ''', language="json")
+
     
     # Process and display results if we have medical data
     if medical_data is not None:
