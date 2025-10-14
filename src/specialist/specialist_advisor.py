@@ -36,21 +36,42 @@ class SpecialistAdvisor:
         """
         self.api_key = api_key
         
-        # Pre-initialize Hugging Face client for medical analysis
-        self.medical_client = InferenceClient(
-            provider="featherless-ai",
-            api_key=api_key,
-        )
+        # Try to initialize Hugging Face client for medical analysis
+        try:
+            self.medical_client = InferenceClient(
+                provider="featherless-ai",
+                api_key=api_key,
+            )
+            self.hf_available = True
+            logger.info("Hugging Face client initialized for medical analysis")
+        except Exception as e:
+            self.medical_client = None
+            self.hf_available = False
+            logger.warning(f"Hugging Face client initialization failed: {e}")
         
-        # Initialize Gemini for JSON formatting
+        # Initialize Gemini (can be used for both medical analysis and formatting)
         self.gemini_api_key = gemini_api_key or os.getenv("GEMINI_API_KEY")
         if self.gemini_api_key:
-            genai.configure(api_key=self.gemini_api_key)
-            self.gemini_model = genai.GenerativeModel('gemini-2.5-flash-image')
-            logger.info("Gemini model initialized for JSON formatting")
+            try:
+                genai.configure(api_key=self.gemini_api_key)
+                self.gemini_model = genai.GenerativeModel('gemini-1.5-flash')
+                logger.info("Gemini model initialized (can handle both medical analysis and formatting)")
+            except Exception as e:
+                self.gemini_model = None
+                logger.warning(f"Gemini initialization failed: {e}")
         else:
             self.gemini_model = None
-            logger.info("No Gemini key provided, will use Hugging Face fallback")
+            logger.info("No Gemini key provided")
+        
+        # Check if we have at least one working service
+        if not self.hf_available and not self.gemini_model:
+            logger.error("Neither Hugging Face nor Gemini is available!")
+        elif not self.hf_available and self.gemini_model:
+            logger.info("Running in Gemini-only mode (both medical analysis and formatting)")
+        elif self.hf_available and not self.gemini_model:
+            logger.info("Running in Hugging Face-only mode")
+        else:
+            logger.info("Both Hugging Face and Gemini available (optimal setup)")
         
         # Note: Hugging Face formatter client is created fresh when needed (like original code)
         
@@ -95,7 +116,7 @@ class SpecialistAdvisor:
     
     def _get_health_plan_optimized(self, medical_data: str) -> HealthRecommendations:
         """
-        Optimized version of the original get_health_plan function.
+        Optimized version with Gemini fallback for both medical analysis and formatting.
         
         Args:
             medical_data (str): Medical data in JSON string format
@@ -103,46 +124,89 @@ class SpecialistAdvisor:
         Returns:
             Dict[str, Any]: Structured health plan
         """
-        # Step 1: Generate health plan text (same prompt as original)
+        # Step 1: Generate health plan text - try Hugging Face first, fallback to Gemini
         try:
-            # Analyze findings for targeted prompt (optimization)
-            findings = self._quick_analyze_findings(medical_data)
-            findings_text = ", ".join(findings) if findings else "High WBC, High Creatinine, Low Potassium"
-            
-            prompt1 = f"""
-            Analyze the following medical data. Based on the findings ({findings_text}),
-            generate a detailed diet and exercise plan.
-
-            **Medical Data:**
-            ```json
-            {medical_data}
-            ```
-
-            **Instructions:**
-            1.  **Diet Plan:** Suggest specific foods to eat and avoid to address the {findings_text.lower()}.
-            2.  **Exercise Plan:** Recommend safe and appropriate exercises (e.g., light cardio, strength training).
-            3.  **Disclaimer:** Include a clear disclaimer that this is not a substitute for professional medical advice.
-            4.  **Format:** Use clear headings for each section. Do not add any conversational intro or conclusion.
-            """
-
-            completion1 = self.medical_client.chat.completions.create(
-                model="Intelligent-Internet/II-Medical-8B",
-                messages=[{"role": "user", "content": prompt1}],
-                max_tokens=1200,  # Reduced for speed
-                temperature=0.5   # Reduced for faster, more focused responses
-            )
-
-            health_plan_text = completion1.choices[0].message.content
+            health_plan_text = self._generate_health_plan_with_fallback(medical_data)
+            if not health_plan_text:
+                return {"error": "Failed to generate health plan with both services"}
 
         except Exception as e:
-            return {"error": f"Failed to get response from medical model: {e}"}
+            return {"error": f"Failed to generate health plan: {e}"}
 
-        # Step 2: Structure the output using Gemini or fallback
+        # Step 2: Structure the output using Gemini or Hugging Face fallback
         try:
             return self._format_with_gemini_or_fallback(health_plan_text)
 
         except Exception as e:
             return {"error": f"Failed to format health plan: {e}"}
+    
+    def _generate_health_plan_with_fallback(self, medical_data: str) -> str:
+        """
+        Generate health plan using Hugging Face first, then Gemini fallback.
+        
+        Args:
+            medical_data (str): Medical data in JSON string format
+            
+        Returns:
+            str: Generated health plan text
+        """
+        # Analyze findings for targeted prompt
+        findings = self._quick_analyze_findings(medical_data)
+        findings_text = ", ".join(findings) if findings else "High WBC, High Creatinine, Low Potassium"
+        
+        prompt = f"""
+        Analyze the following medical data. Based on the findings ({findings_text}),
+        generate a detailed diet and exercise plan.
+
+        **Medical Data:**
+        ```json
+        {medical_data}
+        ```
+
+        **Instructions:**
+        1. **Diet Plan:** Suggest specific foods to eat and avoid to address the {findings_text.lower()}.
+        2. **Exercise Plan:** Recommend safe and appropriate exercises (e.g., light cardio, strength training).
+        3. **General Recommendations:** Include lifestyle modifications and monitoring suggestions.
+        4. **Disclaimer:** Include a clear disclaimer that this is not a substitute for professional medical advice.
+        5. **Format:** Use clear headings for each section. Be specific and actionable.
+        """
+        
+        # Try Hugging Face first
+        try:
+            logger.info("Trying Hugging Face for medical analysis")
+            completion = self.medical_client.chat.completions.create(
+                model="Intelligent-Internet/II-Medical-8B",
+                messages=[{"role": "user", "content": prompt}],
+                max_tokens=1200,
+                temperature=0.5
+            )
+            health_plan_text = completion.choices[0].message.content
+            logger.info("Successfully generated health plan with Hugging Face")
+            return health_plan_text
+            
+        except Exception as e:
+            logger.warning(f"Hugging Face medical analysis failed: {e}")
+            
+            # Fallback to Gemini for medical analysis
+            if self.gemini_model:
+                try:
+                    logger.info("Falling back to Gemini for medical analysis")
+                    response = self.gemini_model.generate_content(
+                        prompt,
+                        generation_config=genai.types.GenerationConfig(
+                            temperature=0.6,
+                            max_output_tokens=1500,
+                        )
+                    )
+                    health_plan_text = response.text
+                    logger.info("Successfully generated health plan with Gemini")
+                    return health_plan_text
+                    
+                except Exception as gemini_error:
+                    logger.error(f"Gemini medical analysis also failed: {gemini_error}")
+                    raise Exception(f"Both Hugging Face and Gemini failed for medical analysis")
+            else:
+                raise Exception(f"Hugging Face failed and no Gemini API key available: {e}")
     
     def _format_with_gemini_or_fallback(self, health_plan_text: str) -> dict[str, Any]:
         """
@@ -264,6 +328,10 @@ class SpecialistAdvisor:
         Returns:
             Dict[str, Any]: Structured JSON response
         """
+        if not self.hf_available:
+            logger.error("Hugging Face not available for formatting")
+            return {"error": "Hugging Face service not available"}
+            
         try:
             logger.info("Using Hugging Face DeepSeek for JSON formatting")
             

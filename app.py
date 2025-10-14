@@ -150,27 +150,29 @@ def render_sidebar():
         "Hugging Face API Key",
         value=default_hf_key,
         type="password",
-        help="Required for medical analysis"
+        help="For medical analysis. Can be omitted if Gemini key is provided."
     )
     
     gemini_key = st.sidebar.text_input(
-        "Gemini API Key (Optional)",
+        "Gemini API Key",
         value=default_gemini_key,
         type="password",
-        help="Optional: Faster JSON formatting. Falls back to Hugging Face if not provided."
+        help="Can handle both medical analysis and formatting. Faster than Hugging Face."
     )
     
     # Set Gemini key in environment for the specialist advisor
     if gemini_key:
         os.environ["GEMINI_API_KEY"] = gemini_key
     
-    if not api_key:
-        st.sidebar.warning("⚠️ Hugging Face API key required for specialist recommendations")
-    
-    if gemini_key:
-        st.sidebar.success("✅ Gemini enabled for faster processing")
-    else:
-        st.sidebar.info("ℹ️ Using Hugging Face fallback for JSON formatting")
+    # Show API key status
+    if not api_key and not gemini_key:
+        st.sidebar.error("❌ No API keys provided - specialist recommendations unavailable")
+    elif not api_key and gemini_key:
+        st.sidebar.success("✅ Gemini-only mode enabled (handles both medical analysis and formatting)")
+    elif api_key and not gemini_key:
+        st.sidebar.info("ℹ️ Hugging Face mode (medical analysis + formatting)")
+    elif api_key and gemini_key:
+        st.sidebar.success("✅ Optimal setup: Hugging Face + Gemini (fastest processing)")
     
     st.sidebar.markdown("---")
     
@@ -363,8 +365,14 @@ def generate_recommendations(app: SehatScanApp, medical_data: MedicalData, api_k
     """Generate AI-powered specialist recommendations."""
     st.subheader("🩺 Specialist Recommendations")
     
-    if not api_key:
-        st.warning("⚠️ Please provide a Hugging Face API key to generate recommendations")
+    if not api_key and not os.getenv("GEMINI_API_KEY"):
+        st.warning("⚠️ Please provide at least one API key (Hugging Face or Gemini) to generate recommendations")
+        st.info(
+            "**API Key Options:**\n"
+            "- **Hugging Face**: For medical analysis (required if no Gemini)\n"
+            "- **Gemini**: Can handle both medical analysis and formatting\n"
+            "- **Both**: Optimal setup for fastest processing"
+        )
         return
     
     try:
