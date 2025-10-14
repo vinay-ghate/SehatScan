@@ -18,7 +18,7 @@ SehatScan AI helps you instantly understand your lab reports in clear, simple la
 
 1. **Get the code:**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/vinay-ghate/SehatScan
    cd SehatScan
    ```
 
