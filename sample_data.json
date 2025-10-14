@@ -1,0 +1,70 @@
+{
+  "patient": {
+    "name": "John Doe",
+    "dob": "12/05/1988",
+    "sex": "Male"
+  },
+  "report_details": {
+    "report_date": "09/28/2025",
+    "specimen": "Blood",
+    "accession": "A123456789"
+  },
+  "observations": [
+    {
+      "test_name": "Hemoglobin",
+      "result": "13.2",
+      "unit": "g/dL",
+      "reference_range": "12.0-16.0",
+      "flag": "N"
+    },
+    {
+      "test_name": "Hematocrit",
+      "result": "39.5",
+      "unit": "%",
+      "reference_range": "36.0-46.0",
+      "flag": "N"
+    },
+    {
+      "test_name": "WBC",
+      "result": "11.8",
+      "unit": "x10^3/uL",
+      "reference_range": "4.0-10.0",
+      "flag": "H"
+    },
+    {
+      "test_name": "Platelets",
+      "result": "150",
+      "unit": "x10^3/uL",
+      "reference_range": "150-450",
+      "flag": "N"
+    },
+    {
+      "test_name": "Glucose",
+      "result": "98",
+      "unit": "mg/dL",
+      "reference_range": "70-99",
+      "flag": "N"
+    },
+    {
+      "test_name": "Creatinine",
+      "result": "1.3",
+      "unit": "mg/dL",
+      "reference_range": "0.6-1.2",
+      "flag": "H"
+    },
+    {
+      "test_name": "Sodium",
+      "result": "140",
+      "unit": "mmol/L",
+      "reference_range": "135-145",
+      "flag": "N"
+    },
+    {
+      "test_name": "Potassium",
+      "result": "3.3",
+      "unit": "mmol/L",
+      "reference_range": "3.5-5.1",
+      "flag": "L"
+    }
+  ]
+}

@@ -1,0 +1,106 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+*.pyo
+*.pyd
+*.so
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+.env
+.env.local
+.env.*.local
+
+# UV package manager
+.uv/
+uv.lock
+
+# Python version management
+.python-version
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Streamlit
+.streamlit/
+.streamlit/secrets.toml
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pytest
+.pytest_cache/
+.coverage
+htmlcov/
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Application specific files
+*.json
+!sample_data.json
+!pyproject.toml
+!package.json
+temp_*
+output_*
+health_plan.json
+*.log
+*.tmp
+
+# Generated images and documents
+*.png
+*.jpg
+*.jpeg
+*.pdf
+!sample_*.png
+!example_*.jpg
+
+# Old code directories (to be cleaned up manually)
+json-visualizer/
+MedicalOCR/
+
+# Temporary files
+main.py
+specilistSuggest.py
+
+# Windows specific
+*.bat
+!install.bat
+!run.bat
+
+# Cache directories
+.cache/
+node_modules/
+
+# API keys and secrets (extra safety)
+*api_key*
+*secret*
+*token*
+!*example*
