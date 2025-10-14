@@ -95,6 +95,8 @@ SehatScan needs AI services to analyze your reports:
 ### Alternative: Paste JSON Data
 If you already have digital medical data, paste it in the "Input JSON" tab.
 
+> **Note**: On some cloud platforms (like Streamlit Cloud), OCR may not be available due to system dependencies. The app will automatically show the JSON input option as the primary method.
+
 ## 🛡️ Privacy & Security
 
 - **Local Processing**: Your medical data never leaves your device

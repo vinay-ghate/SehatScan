@@ -20,9 +20,15 @@ type LineGroups = list[list[dict[str, Any]]]
 try:
     from paddleocr import PaddleOCR
     PADDLEOCR_AVAILABLE = True
-except ImportError:
+    logger.info("PaddleOCR successfully imported")
+except ImportError as e:
     PADDLEOCR_AVAILABLE = False
     PaddleOCR = None
+    logger.warning(f"PaddleOCR not available: {e}")
+except Exception as e:
+    PADDLEOCR_AVAILABLE = False
+    PaddleOCR = None
+    logger.warning(f"PaddleOCR import failed: {e}")
 
 logger = logging.getLogger(__name__)
 

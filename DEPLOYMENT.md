@@ -84,9 +84,10 @@ cp .env.example .env
 ### **Common Issues:**
 
 1. **OCR Dependencies:**
-   - Some platforms may have issues with PaddleOCR
-   - The app will show helpful error messages
-   - OCR is optional - you can still use JSON input
+   - PaddleOCR may not work on Streamlit Cloud due to system dependencies
+   - **Solution**: Use the "Input JSON" tab to paste medical data directly
+   - OCR works best in local development environments
+   - The app automatically detects OCR availability and adapts the interface
 
 2. **API Keys:**
    - Make sure keys are properly set in Streamlit secrets

@@ -61,11 +61,17 @@ class SehatScanApp:
                 try:
                     self.ocr_processor = MedicalOCRProcessor()
                 except ImportError as e:
-                    st.error(f"❌ OCR dependencies not installed: {str(e)}")
-                    st.info("💡 Please run: `uv sync` to install all dependencies")
+                    st.error("❌ OCR functionality not available")
+                    st.info(
+                        "🔄 **Alternative Options:**\n"
+                        "- Use the 'Input JSON' tab to paste medical data directly\n"
+                        "- OCR dependencies may not be available on this platform\n"
+                        "- For local development, install with: `uv sync --extra ocr`"
+                    )
                     return None
                 except Exception as e:
-                    st.error(f"❌ Failed to initialize OCR: {str(e)}")
+                    st.error(f"❌ OCR initialization failed: {str(e)}")
+                    st.info("💡 You can still use the JSON input feature!")
                     return None
         return self.ocr_processor
     
@@ -162,12 +168,19 @@ def render_sidebar():
     
     # Application Info
     st.sidebar.subheader("ℹ️ About")
+    # Check OCR availability for sidebar info
+    try:
+        from src.medical_ocr.ocr_processor import PADDLEOCR_AVAILABLE
+        ocr_status = "📄 **Smart OCR** - Reads your report images" if PADDLEOCR_AVAILABLE else "📄 **JSON Input** - Paste your medical data"
+    except:
+        ocr_status = "📄 **JSON Input** - Paste your medical data"
+    
     st.sidebar.info(
-        "SehatScan makes your medical reports easy to understand:\n\n"
-        "📄 **Smart OCR** - Reads your report images\n"
-        "📊 **Visual Charts** - Shows your health data clearly\n"
-        "🤖 **AI Insights** - Provides personalized recommendations\n\n"
-        "🔒 **Privacy First** - Your data stays on your device"
+        f"SehatScan makes your medical reports easy to understand:\n\n"
+        f"{ocr_status}\n"
+        f"📊 **Visual Charts** - Shows your health data clearly\n"
+        f"🤖 **AI Insights** - Provides personalized recommendations\n\n"
+        f"🔒 **Privacy First** - Your data stays on your device"
     )
     
     return api_key
