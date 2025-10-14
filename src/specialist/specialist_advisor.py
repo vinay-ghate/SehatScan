@@ -8,9 +8,13 @@ import json
 import logging
 import hashlib
 import os
-from typing import Dict, Any, Optional
+from typing import Any, Optional
 from huggingface_hub import InferenceClient
 import google.generativeai as genai
+
+# Python 3.12+ type aliases
+type MedicalData = dict[str, Any]
+type HealthRecommendations = dict[str, Any]
 
 logger = logging.getLogger(__name__)
 
@@ -55,7 +59,7 @@ class SpecialistAdvisor:
         
         logger.info("Specialist Advisor initialized with optimized clients and caching")
     
-    def get_health_recommendations(self, medical_data: Dict[str, Any]) -> Dict[str, Any]:
+    def get_health_recommendations(self, medical_data: MedicalData) -> HealthRecommendations:
         """
         Generate health recommendations using the exact logic from specilistSuggest.py.
         
@@ -89,7 +93,7 @@ class SpecialistAdvisor:
             logger.error(f"Failed to generate health recommendations: {str(e)}")
             return {"error": f"Failed to generate recommendations: {str(e)}"}
     
-    def _get_health_plan_optimized(self, medical_data: str) -> Dict[str, Any]:
+    def _get_health_plan_optimized(self, medical_data: str) -> HealthRecommendations:
         """
         Optimized version of the original get_health_plan function.
         
@@ -140,7 +144,7 @@ class SpecialistAdvisor:
         except Exception as e:
             return {"error": f"Failed to format health plan: {e}"}
     
-    def _format_with_gemini_or_fallback(self, health_plan_text: str) -> Dict[str, Any]:
+    def _format_with_gemini_or_fallback(self, health_plan_text: str) -> dict[str, Any]:
         """
         Format health plan using Gemini (preferred) or Hugging Face fallback.
         
@@ -250,7 +254,7 @@ class SpecialistAdvisor:
             # Try Hugging Face fallback
             return self._format_with_huggingface(prompt)
     
-    def _format_with_huggingface(self, prompt: str) -> Dict[str, Any]:
+    def _format_with_huggingface(self, prompt: str) -> dict[str, Any]:
         """
         Fallback formatting using Hugging Face DeepSeek model (exact logic from specilistSuggest.py).
         
@@ -334,7 +338,7 @@ class SpecialistAdvisor:
             logger.debug(f"Quick analysis failed: {e}")
         
         return findings if findings else ["High WBC", "High Creatinine", "Low Potassium"] 
-    def _validate_json_structure(self, data: Dict[str, Any]) -> bool:
+    def _validate_json_structure(self, data: dict[str, Any]) -> bool:
         """
         Validate that the JSON has the required structure.
         
